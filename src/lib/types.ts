@@ -61,6 +61,7 @@ export interface Stats {
   busyMonthCount: number;
   firstDepart: Order | null;
   lastEvent: Order | null;
+  latestDepart: Order | null;
   activeDays: number;
   longest: Trip | null;
   ongoing: Trip | null;

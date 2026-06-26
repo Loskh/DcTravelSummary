@@ -58,9 +58,8 @@ function SceneCover(s: Stats, onEnter: () => void): ReactElement {
       <div className="sun" />
       <p className="eyebrow reveal" style={reveal(0)}>FINAL FANTASY XIV · 超域旅行</p>
       <h1 className="cover-title reveal" style={reveal(1)}>超域旅行<br />年度报告</h1>
-      <p className="cover-sub reveal" style={reveal(2)}>{s.roleName}</p>
-      <p className="cover-range reveal" style={reveal(3)}>{range}</p>
-      <button className="enter reveal" style={reveal(4)} onClick={onEnter}>进 入</button>
+      <p className="cover-range reveal" style={reveal(2)}>{range}</p>
+      <button className="enter reveal" style={reveal(3)} onClick={onEnter}>进 入</button>
     </Scene>
   );
 }
@@ -201,6 +200,27 @@ function SceneHours(s: Stats): ReactElement {
   );
 }
 
+function SceneLateNight(s: Stats): ReactElement | null {
+  const o = s.latestDepart;
+  if (!o || !o._d) return null;
+  const h = o._d.getHours();
+  if (h >= 6 && h < 22) return null; // 不够晚就不单开一镜
+  const wee = h < 6; // 六点之前算凌晨
+  const hh = String(h).padStart(2, '0');
+  const mm = String(o._d.getMinutes()).padStart(2, '0');
+  return (
+    <Scene k="latenight" bg={NIGHT} dark>
+      <p className="lead reveal" style={reveal(0)}>{o._d.getMonth() + 1} 月 {o._d.getDate()} 日</p>
+      <p className="lead reveal" style={reveal(1)}>这一天你睡得很晚</p>
+      <p className="lead big reveal" style={reveal(2)}><b className="em">{hh}:{mm}</b> 还在超域传送</p>
+      <p className="muted reveal" style={reveal(3)}>传送完之后，又发了个「<b className="em">QQ 空间</b>」装逼</p>
+      <p className="lead reveal" style={reveal(4)}>
+        你见过 <b className="em">{wee ? '凌晨 ' : ''}{h} 点</b>的《<b className="em">{o.targetGroupName}</b>》吗
+      </p>
+    </Scene>
+  );
+}
+
 function SceneMonths(s: Stats): ReactElement {
   const maxM = Math.max(...s.byMonth) || 1;
   return (
@@ -309,7 +329,6 @@ function SceneFinale(s: Stats, onRestart: () => void): ReactElement {
     <Scene k="finale" bg="linear-gradient(180deg,#fff,#f5b39c)" extra="finale">
       <div className="card reveal" style={reveal(0)}>
         <p className="card-title">超域旅行 · 年度报告</p>
-        <p className="card-name">{s.roleName}</p>
         <ul className="card-stats">
           {rows.map((r) => (
             <li key={r[0]}>
@@ -338,6 +357,7 @@ function buildScenes(s: Stats, h: Handlers): ReactElement[] {
     SceneDonut(s),
     SceneFootprint(s),
     SceneHours(s),
+    SceneLateNight(s),
     SceneMonths(s),
     SceneLongest(s),
     SceneRepat(s),

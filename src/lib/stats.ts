@@ -148,6 +148,14 @@ export function computeStats(all: Order[], fetchedAt: string | null): Stats {
   const favHour = argmax(byHour);
   const busyM = argmax(byMonth);
 
+  // 「最晚一次出发」：0–5 点（六点之前）视为凌晨，比晚上更「晚」
+  const lateScore = (o: Order): number => {
+    const h = o._d ? o._d.getHours() : -1;
+    return h < 0 ? -1 : h < 6 ? h + 24 : h;
+  };
+  const latestDepart =
+    outOK.filter((o) => o._d).slice().sort((a, b) => lateScore(b) - lateScore(a))[0] || null;
+
   return {
     total: out.length,
     successDepart: outOK.length,
@@ -168,6 +176,7 @@ export function computeStats(all: Order[], fetchedAt: string | null): Stats {
     busyMonthCount: byMonth[busyM],
     firstDepart: datedOutReal[0] || datedOut[0] || null,
     lastEvent: datedTravelReal[datedTravelReal.length - 1] || datedTravel[datedTravel.length - 1] || null,
+    latestDepart,
     activeDays: Object.keys(dayMap).length,
     longest: stay.longest,
     ongoing: stay.ongoing,

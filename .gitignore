@@ -5,6 +5,9 @@ node_modules/
 dist/
 .vite/
 
+# local scratch / reference clones / screenshots
+.ref/
+
 # local data (personal travel dumps)
 example/
 

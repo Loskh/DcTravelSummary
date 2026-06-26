@@ -1,23 +1,39 @@
-import { cloneElement, useEffect, useMemo, useRef } from 'react';
-import type { CSSProperties, ReactElement } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import type { Stats } from '../lib/types';
 import { dcColor, donutStops, fmtDur, fmtFull, fmtYMD, describe } from '../lib/format';
 
 type CSSVars = CSSProperties & Record<string, string | number>;
 const reveal = (i: number): CSSVars => ({ '--i': i });
 
-// 网易云式：每屏一整块鲜艳背景，逐屏切换
-const SCENE_BG = [
-  'linear-gradient(165deg, #3b2f63 0%, #211b3e 60%, #14112b 100%)', // 封面 · 深夜紫
-  'linear-gradient(160deg, #ff6a88 0%, #e0244f 100%)', // 玫红
-  'linear-gradient(160deg, #3a47d5 0%, #00b4d8 100%)', // 蓝青
-  'linear-gradient(160deg, #8e2de2 0%, #d6336c 100%)', // 紫红
-  'linear-gradient(160deg, #0f9b8e 0%, #34d17a 100%)', // 青绿
-  'linear-gradient(160deg, #f7971e 0%, #ffce3a 100%)', // 橙金
-  'linear-gradient(160deg, #ee5a6f 0%, #f29263 100%)', // 珊瑚
-  'linear-gradient(160deg, #2b86c5 0%, #784ba0 60%, #ff3cac 100%)', // 蓝紫粉
-  'linear-gradient(160deg, #11998e 0%, #38ef7d 100%)' // 翠
+/* 暖色奶油/蜜桃分镜底色（取自网易云 2018 年度报告各页 .bg） */
+const LIGHT = [
+  'linear-gradient(180deg,#fff 55%,#f9cbb5 92%)',
+  '#fdf4ef',
+  'linear-gradient(60deg,#f8ddd1,#faece5 73%,#fad2c0)',
+  '#feded1',
+  'linear-gradient(180deg,#fff,#fdeee7 56%,#fad7c4 92%)',
+  '#f8c9ae',
+  'linear-gradient(0deg,#f8d7cf,#fff 55%,#fff)',
+  '#fadfd2'
 ];
+const NIGHT = 'linear-gradient(0deg,#0e050b 0%,#2d1815 100%)';
+
+interface SceneProps {
+  k: string;
+  bg: string;
+  dark?: boolean;
+  extra?: string;
+  children: ReactNode;
+}
+function Scene({ k, bg, dark, extra, children }: SceneProps): ReactElement {
+  const cls = 'scene' + (dark ? ' dark' : '') + (extra ? ' ' + extra : '');
+  return (
+    <section className={cls} style={{ background: bg }} key={k}>
+      <div className="wrap">{children}</div>
+    </section>
+  );
+}
 
 function countUp(el: HTMLElement) {
   const target = Number(el.dataset.count) || 0;
@@ -35,39 +51,36 @@ function countUp(el: HTMLElement) {
 
 /* ============================ 场景 ============================ */
 
-function SceneCover(s: Stats): ReactElement {
+function SceneCover(s: Stats, onEnter: () => void): ReactElement {
   const range = s.firstDepart && s.lastEvent ? `${fmtYMD(s.firstDepart)} — ${fmtYMD(s.lastEvent)}` : '';
   return (
-    <section className="scene cover" key="cover">
-      <div className="wrap">
-        <p className="eyebrow reveal" style={reveal(0)}>FINAL FANTASY XIV · 超域旅行</p>
-        <h1 className="cover-title reveal" style={reveal(1)}>超域旅行<br />年度报告</h1>
-        <p className="cover-sub reveal" style={reveal(2)}>{s.roleName}</p>
-        <p className="cover-range reveal" style={reveal(3)}>{range}</p>
-        <p className="scroll-hint reveal" style={reveal(4)}>向下滑动，开启回顾 ▾</p>
-      </div>
-    </section>
+    <Scene k="cover" bg="var(--cover)" dark extra="cover">
+      <div className="sun" />
+      <p className="eyebrow reveal" style={reveal(0)}>FINAL FANTASY XIV · 超域旅行</p>
+      <h1 className="cover-title reveal" style={reveal(1)}>超域旅行<br />年度报告</h1>
+      <p className="cover-sub reveal" style={reveal(2)}>{s.roleName}</p>
+      <p className="cover-range reveal" style={reveal(3)}>{range}</p>
+      <button className="enter reveal" style={reveal(4)} onClick={onEnter}>进 入</button>
+    </Scene>
   );
 }
 
 function SceneTotal(s: Stats): ReactElement {
   return (
-    <section className="scene" key="total">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>这段时间，你成功踏上了</p>
-        <p className="bignum reveal" style={reveal(1)}>
-          <b data-count={s.successDepart} data-dur={1500}>0</b>
-          <span className="unit">次超域旅行</span>
-        </p>
-        <p className="muted reveal" style={reveal(2)}>
-          {s.failDepart > 0 ? (
-            <>另有 <b style={{ color: 'var(--hi)', fontWeight: 800 }}>{s.failDepart}</b> 次倒在预检门口 · 横跨 {s.activeDays} 天</>
-          ) : (
-            <>横跨 {s.activeDays} 个旅行的日子</>
-          )}
-        </p>
-      </div>
-    </section>
+    <Scene k="total" bg={LIGHT[0]}>
+      <p className="lead reveal" style={reveal(0)}>这段时间，你成功踏上了</p>
+      <p className="bignum reveal" style={reveal(1)}>
+        <b data-count={s.successDepart} data-dur={1500}>0</b>
+        <span className="unit">次超域旅行</span>
+      </p>
+      <p className="muted reveal" style={reveal(2)}>
+        {s.failDepart > 0 ? (
+          <>另有 <b className="em">{s.failDepart}</b> 次倒在预检门口 · 横跨 {s.activeDays} 天</>
+        ) : (
+          <>横跨 {s.activeDays} 个旅行的日子</>
+        )}
+      </p>
+    </Scene>
   );
 }
 
@@ -75,14 +88,12 @@ function SceneOutBack(s: Stats): ReactElement {
   const sum = s.successDepart + s.backOK || 1;
   const pct = Math.round((s.successDepart / sum) * 100);
   return (
-    <section className="scene" key="outback">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>你 <b data-count={s.successDepart}>0</b> 次启程远行</p>
-        <p className="lead reveal" style={reveal(1)}>又 <b data-count={s.backOK}>0</b> 次平安回到「{s.homeServer}」</p>
-        <div className="ratiobar reveal" style={reveal(2)}><i data-grow={pct} /></div>
-        <p className="muted reveal" style={reveal(3)}>{s.ongoing ? '此刻还有一段旅程仍在继续……' : '有去有回，是旅人的浪漫'}</p>
-      </div>
-    </section>
+    <Scene k="outback" bg={LIGHT[1]}>
+      <p className="lead reveal" style={reveal(0)}>你 <b data-count={s.successDepart}>0</b> 次启程远行</p>
+      <p className="lead reveal" style={reveal(1)}>又 <b data-count={s.backOK}>0</b> 次平安回到「{s.homeServer}」</p>
+      <div className="ratiobar reveal" style={reveal(2)}><i data-grow={pct} /></div>
+      <p className="muted reveal" style={reveal(3)}>{s.ongoing ? '此刻还有一段旅程仍在继续……' : '有去有回，是旅人的浪漫'}</p>
+    </Scene>
   );
 }
 
@@ -92,28 +103,26 @@ function SceneTopServer(s: Stats): ReactElement | null {
   const maxC = top[1] || 1;
   const pctTop = s.successDepart ? Math.round((top[1] / s.successDepart) * 100) : 0;
   return (
-    <section className="scene" key="topserver">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>你最常造访的服务器是</p>
-        <h2 className="hl reveal" style={reveal(1)}>{top[0]}</h2>
-        <p className="muted reveal" style={reveal(2)}>成功抵达 {top[1]} 次，约占全部行程的 {pctTop}%</p>
-        <ul className="rank reveal" style={reveal(3)}>
-          {s.byServer.slice(0, 8).map((e, i) => {
-            const w = Math.round((e[1] / maxC) * 100);
-            return (
-              <li key={e[0]}>
-                <span className="rk">{i + 1}</span>
-                <span className="nm">
-                  {e[0]}
-                  <span className="bar"><i style={reveal(i)} data-grow={w} /></span>
-                </span>
-                <span className="ct"><b>{e[1]}</b> 次</span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </section>
+    <Scene k="topserver" bg={LIGHT[2]}>
+      <p className="lead reveal" style={reveal(0)}>你最常造访的服务器是</p>
+      <h2 className="hl reveal" style={reveal(1)}>{top[0]}</h2>
+      <p className="muted reveal" style={reveal(2)}>成功抵达 {top[1]} 次，约占全部行程的 {pctTop}%</p>
+      <ul className="rank reveal" style={reveal(3)}>
+        {s.byServer.slice(0, 8).map((e, i) => {
+          const w = Math.round((e[1] / maxC) * 100);
+          return (
+            <li key={e[0]}>
+              <span className="rk">{i + 1}</span>
+              <span className="nm">
+                {e[0]}
+                <span className="bar"><i style={reveal(i)} data-grow={w} /></span>
+              </span>
+              <span className="ct"><b>{e[1]}</b> 次</span>
+            </li>
+          );
+        })}
+      </ul>
+    </Scene>
   );
 }
 
@@ -122,105 +131,97 @@ function SceneDonut(s: Stats): ReactElement | null {
   const entries = s.byDC.slice(0, 6);
   const total = entries.reduce((a, e) => a + e[1], 0) || 1;
   return (
-    <section className="scene" key="donut">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>你的旅行版图</p>
-        <div className="donutwrap reveal" style={reveal(1)}>
-          <div className="donut" style={{ '--stops': donutStops(entries) } as CSSVars} />
-          <div className="legend">
-            {entries.map((e, i) => (
-              <div className="row" key={e[0]}>
-                <span className="sw" style={{ background: dcColor(e[0], i) }} />
-                {e[0]}
-                <span className="lc">{e[1]} 次 · {Math.round((e[1] / total) * 100)}%</span>
-              </div>
-            ))}
-          </div>
+    <Scene k="donut" bg={LIGHT[3]}>
+      <p className="lead reveal" style={reveal(0)}>你的旅行版图</p>
+      <div className="donutwrap reveal" style={reveal(1)}>
+        <div className="donut" style={{ '--stops': donutStops(entries) } as CSSVars} />
+        <div className="legend">
+          {entries.map((e, i) => (
+            <div className="row" key={e[0]}>
+              <span className="sw" style={{ background: dcColor(e[0], i) }} />
+              {e[0]}
+              <span className="lc">{e[1]} 次 · {Math.round((e[1] / total) * 100)}%</span>
+            </div>
+          ))}
         </div>
-        <p className="muted reveal" style={reveal(2)}>足迹覆盖 {s.uniqueDCs} 个大区</p>
       </div>
-    </section>
+      <p className="muted reveal" style={reveal(2)}>足迹覆盖 {s.uniqueDCs} 个大区</p>
+    </Scene>
   );
 }
 
 function SceneFootprint(s: Stats): ReactElement {
   return (
-    <section className="scene" key="footprint">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>你的足迹，成功抵达过</p>
-        <p className="bignum reveal" style={reveal(1)}>
-          <b data-count={s.uniqueServers}>0</b>
-          <span className="unit">个服务器</span>
-        </p>
-        <div className="chips reveal" style={reveal(2)}>
-          {s.byServer.slice(0, 12).map((e) => (
-            <span className="tagchip" key={e[0]}>{e[0]}<b>{e[1]}</b></span>
-          ))}
-        </div>
-        {s.failDepart > 0 && <p className="muted reveal" style={reveal(3)}>另有 {s.failDepart} 次预检失败，未能成行</p>}
+    <Scene k="footprint" bg={LIGHT[4]}>
+      <p className="lead reveal" style={reveal(0)}>你的足迹，成功抵达过</p>
+      <p className="bignum reveal" style={reveal(1)}>
+        <b data-count={s.uniqueServers}>0</b>
+        <span className="unit">个服务器</span>
+      </p>
+      <div className="chips reveal" style={reveal(2)}>
+        {s.byServer.slice(0, 12).map((e) => (
+          <span className="tagchip" key={e[0]}>{e[0]}<b>{e[1]}</b></span>
+        ))}
       </div>
-    </section>
+      {s.failDepart > 0 && <p className="muted reveal" style={reveal(3)}>另有 {s.failDepart} 次预检失败，未能成行</p>}
+    </Scene>
   );
 }
 
 function SceneHours(s: Stats): ReactElement {
   const maxH = Math.max(...s.byHour) || 1;
   return (
-    <section className="scene" key="hours">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>你最爱在</p>
-        <p className="bignum reveal" style={reveal(1)}>
-          <b data-count={s.favHour}>0</b>
-          <span className="unit">点 出发</span>
-        </p>
-        <div className="bars reveal" style={reveal(2)}>
-          {s.byHour.map((v, h) => {
-            const w = Math.round((v / maxH) * 100);
-            const peak = h === s.favHour && v > 0 ? ' peak' : '';
-            const show = h % 6 === 0 || h === 23 ? ' show' : '';
-            return (
-              <div className={'col' + peak} style={reveal(h)} key={h}>
-                <i data-grow={w} data-axis="h" />
-                <span className={'lab' + show}>{h}</span>
-              </div>
-            );
-          })}
-        </div>
-        <p className="muted reveal" style={reveal(3)}>
-          {s.lateNight > 0 ? (
-            <>其中 <b style={{ color: 'var(--hi)', fontWeight: 800 }}>{s.lateNight}</b> 次在深夜与凌晨（0–6 点）启程</>
-          ) : (
-            <>你几乎总在白天出门</>
-          )}
-        </p>
+    <Scene k="hours" bg={NIGHT} dark>
+      <p className="lead reveal" style={reveal(0)}>你最爱在</p>
+      <p className="bignum reveal" style={reveal(1)}>
+        <b data-count={s.favHour}>0</b>
+        <span className="unit">点 出发</span>
+      </p>
+      <div className="bars reveal" style={reveal(2)}>
+        {s.byHour.map((v, h) => {
+          const w = Math.round((v / maxH) * 100);
+          const peak = h === s.favHour && v > 0 ? ' peak' : '';
+          const show = h % 6 === 0 || h === 23 ? ' show' : '';
+          return (
+            <div className={'col' + peak} style={reveal(h)} key={h}>
+              <i data-grow={w} data-axis="h" />
+              <span className={'lab' + show}>{h}</span>
+            </div>
+          );
+        })}
       </div>
-    </section>
+      <p className="muted reveal" style={reveal(3)}>
+        {s.lateNight > 0 ? (
+          <>其中 <b className="em">{s.lateNight}</b> 次在深夜与凌晨（0–6 点）启程</>
+        ) : (
+          <>你几乎总在白天出门</>
+        )}
+      </p>
+    </Scene>
   );
 }
 
 function SceneMonths(s: Stats): ReactElement {
   const maxM = Math.max(...s.byMonth) || 1;
   return (
-    <section className="scene" key="months">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>
-          <b style={{ color: 'var(--hi)', fontWeight: 800 }}>{s.busyMonth} 月</b>，是你最爱出门的月份
-        </p>
-        <div className="bars reveal" style={reveal(1)}>
-          {s.byMonth.map((v, m) => {
-            const w = Math.round((v / maxM) * 100);
-            const peak = m + 1 === s.busyMonth && v > 0 ? ' peak' : '';
-            return (
-              <div className={'col' + peak} style={reveal(m)} key={m}>
-                <i data-grow={w} data-axis="h" />
-                <span className="lab show">{m + 1}</span>
-              </div>
-            );
-          })}
-        </div>
-        <p className="muted reveal" style={reveal(2)}>那个月你出发了 {s.busyMonthCount} 次</p>
+    <Scene k="months" bg={LIGHT[5]}>
+      <p className="lead reveal" style={reveal(0)}>
+        <b className="em">{s.busyMonth} 月</b>，是你最爱出门的月份
+      </p>
+      <div className="bars reveal" style={reveal(1)}>
+        {s.byMonth.map((v, m) => {
+          const w = Math.round((v / maxM) * 100);
+          const peak = m + 1 === s.busyMonth && v > 0 ? ' peak' : '';
+          return (
+            <div className={'col' + peak} style={reveal(m)} key={m}>
+              <i data-grow={w} data-axis="h" />
+              <span className="lab show">{m + 1}</span>
+            </div>
+          );
+        })}
       </div>
-    </section>
+      <p className="muted reveal" style={reveal(2)}>那个月你出发了 {s.busyMonthCount} 次</p>
+    </Scene>
   );
 }
 
@@ -229,29 +230,25 @@ function SceneLongest(s: Stats): ReactElement | null {
   if (!t) return null;
   const place = `在 ${t.dc} 区「${t.dest}」`;
   return (
-    <section className="scene" key="longest">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>你在远方住得最久的一次，是</p>
-        <h2 className="hl reveal" style={reveal(1)}>{fmtDur(t.ms)}</h2>
-        <p className="muted reveal" style={reveal(2)}>{t.kind === 'ongoing' ? place + '，至今仍未归' : place + '，一次长长的旅居'}</p>
-      </div>
-    </section>
+    <Scene k="longest" bg={LIGHT[6]}>
+      <p className="lead reveal" style={reveal(0)}>你在远方住得最久的一次，是</p>
+      <h2 className="hl reveal" style={reveal(1)}>{fmtDur(t.ms)}</h2>
+      <p className="muted reveal" style={reveal(2)}>{t.kind === 'ongoing' ? place + '，至今仍未归' : place + '，一次长长的旅居'}</p>
+    </Scene>
   );
 }
 
 function SceneRepat(s: Stats): ReactElement | null {
   if (!s.repatCount) return null;
   return (
-    <section className="scene" key="repat">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>没有本地户口的你</p>
-        <p className="bignum reveal" style={reveal(1)}>
-          <b data-count={s.repatCount}>0</b>
-          <span className="unit">次被遣返</span>
-        </p>
-        <p className="muted reveal" style={reveal(2)}>离线超过一天，就被悄悄送回了「{s.homeServer}」</p>
-      </div>
-    </section>
+    <Scene k="repat" bg={LIGHT[7]}>
+      <p className="lead reveal" style={reveal(0)}>没有本地户口的你</p>
+      <p className="bignum reveal" style={reveal(1)}>
+        <b data-count={s.repatCount}>0</b>
+        <span className="unit">次被遣返</span>
+      </p>
+      <p className="muted reveal" style={reveal(2)}>离线超过一天，就被悄悄送回了「{s.homeServer}」</p>
+    </Scene>
   );
 }
 
@@ -259,45 +256,41 @@ function SceneOngoing(s: Stats): ReactElement | null {
   const t = s.ongoing;
   if (!t) return null;
   return (
-    <section className="scene ongoing" key="ongoing">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>而此刻……</p>
-        <p className="lead big reveal" style={reveal(1)}>
-          你的角色「<b style={{ color: 'var(--hi)', fontWeight: 800 }}>{t.role || s.roleName}</b>」
-        </p>
-        <p className="lead big reveal" style={reveal(2)}>
-          于 {t.depart.getMonth() + 1} 月 {t.depart.getDate()} 日 传送至{' '}
-          <b style={{ color: 'var(--hi)', fontWeight: 800 }}>{t.dc}</b> 区（{t.dest}）
-        </p>
-        <p className="awol reveal" style={reveal(3)}>至今未归</p>
-        <p className="muted reveal" style={reveal(4)}>已离家 {fmtDur(t.ms)}</p>
-        {s.ongoingList.length > 1 && (
-          <p className="muted reveal" style={reveal(5)}>还有 {s.ongoingList.length - 1} 位角色，也在远方漂泊</p>
-        )}
-      </div>
-    </section>
+    <Scene k="ongoing" bg={NIGHT} dark>
+      <p className="lead reveal" style={reveal(0)}>而此刻……</p>
+      <p className="lead big reveal" style={reveal(1)}>
+        你的角色「<b className="em">{t.role || s.roleName}</b>」
+      </p>
+      <p className="lead big reveal" style={reveal(2)}>
+        于 {t.depart.getMonth() + 1} 月 {t.depart.getDate()} 日 传送至{' '}
+        <b className="em">{t.dc}</b> 区（{t.dest}）
+      </p>
+      <p className="awol reveal" style={reveal(3)}>至今未归</p>
+      <p className="muted reveal" style={reveal(4)}>已离家 {fmtDur(t.ms)}</p>
+      {s.ongoingList.length > 1 && (
+        <p className="muted reveal" style={reveal(5)}>还有 {s.ongoingList.length - 1} 位角色，也在远方漂泊</p>
+      )}
+    </Scene>
   );
 }
 
 function SceneFirstLast(s: Stats): ReactElement {
   return (
-    <section className="scene" key="firstlast">
-      <div className="wrap">
-        <p className="lead reveal" style={reveal(0)}>每段旅程，都有起点与此刻</p>
-        <div className="cards2 reveal" style={reveal(1)}>
-          <div className="ev">
-            <p className="tag">第一次出发</p>
-            <p className="ev-date">{fmtFull(s.firstDepart)}</p>
-            <p className="ev-desc">{describe(s.firstDepart)}</p>
-          </div>
-          <div className="ev">
-            <p className="tag">最近一次</p>
-            <p className="ev-date">{fmtFull(s.lastEvent)}</p>
-            <p className="ev-desc">{describe(s.lastEvent)}</p>
-          </div>
+    <Scene k="firstlast" bg={LIGHT[0]}>
+      <p className="lead reveal" style={reveal(0)}>每段旅程，都有起点与此刻</p>
+      <div className="cards2 reveal" style={reveal(1)}>
+        <div className="ev">
+          <p className="tag">第一次出发</p>
+          <p className="ev-date">{fmtFull(s.firstDepart)}</p>
+          <p className="ev-desc">{describe(s.firstDepart)}</p>
+        </div>
+        <div className="ev">
+          <p className="tag">最近一次</p>
+          <p className="ev-date">{fmtFull(s.lastEvent)}</p>
+          <p className="ev-desc">{describe(s.lastEvent)}</p>
         </div>
       </div>
-    </section>
+    </Scene>
   );
 }
 
@@ -313,30 +306,32 @@ function SceneFinale(s: Stats, onRestart: () => void): ReactElement {
   ];
   if (s.ongoing) rows.push(['至今未归', s.ongoing.dest]);
   return (
-    <section className="scene finale" key="finale">
-      <div className="wrap">
-        <div className="card reveal" style={reveal(0)}>
-          <p className="card-title">超域旅行 · 年度报告</p>
-          <p className="card-name">{s.roleName}</p>
-          <ul className="card-stats">
-            {rows.map((r) => (
-              <li key={r[0]}>
-                <span>{r[0]}</span>
-                <b>{r[1]}</b>
-              </li>
-            ))}
-          </ul>
-          <p className="card-foot">DC TRAVEL WRAPPED</p>
-        </div>
-        <button className="btn ghost reveal" style={reveal(1)} onClick={onRestart}>再看一次 ↻</button>
+    <Scene k="finale" bg="linear-gradient(180deg,#fff,#f5b39c)" extra="finale">
+      <div className="card reveal" style={reveal(0)}>
+        <p className="card-title">超域旅行 · 年度报告</p>
+        <p className="card-name">{s.roleName}</p>
+        <ul className="card-stats">
+          {rows.map((r) => (
+            <li key={r[0]}>
+              <span>{r[0]}</span>
+              <b>{r[1]}</b>
+            </li>
+          ))}
+        </ul>
+        <p className="card-foot">DC TRAVEL WRAPPED</p>
       </div>
-    </section>
+      <button className="btn reveal" style={reveal(1)} onClick={onRestart}>再看一次 ↻</button>
+    </Scene>
   );
 }
 
-function buildScenes(s: Stats, onRestart: () => void): ReactElement[] {
+interface Handlers {
+  onRestart: () => void;
+  onEnter: () => void;
+}
+function buildScenes(s: Stats, h: Handlers): ReactElement[] {
   return [
-    SceneCover(s),
+    SceneCover(s, h.onEnter),
     SceneTotal(s),
     SceneOutBack(s),
     SceneTopServer(s),
@@ -348,7 +343,7 @@ function buildScenes(s: Stats, onRestart: () => void): ReactElement[] {
     SceneRepat(s),
     SceneOngoing(s),
     SceneFirstLast(s),
-    SceneFinale(s, onRestart)
+    SceneFinale(s, h.onRestart)
   ].filter((x): x is ReactElement => x !== null);
 }
 
@@ -363,13 +358,13 @@ export function Report({ stats, onRestart }: Props) {
   const deckRef = useRef<HTMLDivElement>(null);
   const dotsRef = useRef<HTMLDivElement>(null);
 
+  const go = (i: number) => {
+    const el = deckRef.current?.querySelectorAll<HTMLElement>('.scene')[i];
+    el?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const scenes = useMemo(
-    () =>
-      buildScenes(stats, onRestart).map((el, i) =>
-        cloneElement(el, {
-          style: { ...(el.props.style || {}), background: SCENE_BG[i % SCENE_BG.length] }
-        })
-      ),
+    () => buildScenes(stats, { onRestart, onEnter: () => go(1) }),
     [stats, onRestart]
   );
 
@@ -434,11 +429,6 @@ export function Report({ stats, onRestart }: Props) {
       document.removeEventListener('keydown', onKey);
     };
   }, [scenes]);
-
-  const go = (i: number) => {
-    const el = deckRef.current?.querySelectorAll<HTMLElement>('.scene')[i];
-    el?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
     <>

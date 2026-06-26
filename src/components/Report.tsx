@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import type { Stats } from '../lib/types';
 import { dcColor, donutStops, fmtDur, fmtFull, fmtYMD, describe } from '../lib/format';
-import { NcmArt02 } from './NcmArt02';
+import { NcmArt } from './NcmArt';
 
 type CSSVars = CSSProperties & Record<string, string | number>;
 const reveal = (i: number): CSSVars => ({ '--i': i });
@@ -69,7 +69,7 @@ function SceneCover(s: Stats, onEnter: () => void): ReactElement {
 
 function SceneTotal(s: Stats): ReactElement {
   return (
-    <Scene k="total" bg={LIGHT[0]} extra="s-total" deco={<NcmArt02 />}>
+    <Scene k="total" bg={LIGHT[0]} extra="has-art" deco={<NcmArt page={2} />}>
       <p className="lead reveal" style={reveal(0)}>这段时间，你成功踏上了</p>
       <p className="bignum reveal" style={reveal(1)}>
         <b data-count={s.successDepart} data-dur={1500}>0</b>
@@ -90,7 +90,7 @@ function SceneOutBack(s: Stats): ReactElement {
   const sum = s.successDepart + s.backOK || 1;
   const pct = Math.round((s.successDepart / sum) * 100);
   return (
-    <Scene k="outback" bg={LIGHT[1]}>
+    <Scene k="outback" bg={LIGHT[1]} extra="has-art" deco={<NcmArt page={7} />}>
       <p className="lead reveal" style={reveal(0)}>你 <b data-count={s.successDepart}>0</b> 次启程远行</p>
       <p className="lead reveal" style={reveal(1)}>又 <b data-count={s.backOK}>0</b> 次平安回到「{s.homeServer}」</p>
       <div className="ratiobar reveal" style={reveal(2)}><i data-grow={pct} /></div>
@@ -105,7 +105,7 @@ function SceneTopServer(s: Stats): ReactElement | null {
   const maxC = top[1] || 1;
   const pctTop = s.successDepart ? Math.round((top[1] / s.successDepart) * 100) : 0;
   return (
-    <Scene k="topserver" bg={LIGHT[2]}>
+    <Scene k="topserver" bg={LIGHT[2]} extra="has-art art-corner" deco={<NcmArt page={14} />}>
       <p className="lead reveal" style={reveal(0)}>你最常造访的服务器是</p>
       <h2 className="hl reveal" style={reveal(1)}>{top[0]}</h2>
       <p className="muted reveal" style={reveal(2)}>成功抵达 {top[1]} 次，约占全部行程的 {pctTop}%</p>
@@ -154,7 +154,7 @@ function SceneDonut(s: Stats): ReactElement | null {
 
 function SceneFootprint(s: Stats): ReactElement {
   return (
-    <Scene k="footprint" bg={LIGHT[4]}>
+    <Scene k="footprint" bg={LIGHT[4]} extra="has-art" deco={<NcmArt page={1} />}>
       <p className="lead reveal" style={reveal(0)}>你的足迹，成功抵达过</p>
       <p className="bignum reveal" style={reveal(1)}>
         <b data-count={s.uniqueServers}>0</b>
@@ -212,7 +212,7 @@ function SceneLateNight(s: Stats): ReactElement | null {
   const hh = String(h).padStart(2, '0');
   const mm = String(o._d.getMinutes()).padStart(2, '0');
   return (
-    <Scene k="latenight" bg={NIGHT} dark>
+    <Scene k="latenight" bg={NIGHT} dark extra="has-art" deco={<NcmArt page={4} />}>
       <p className="lead reveal" style={reveal(0)}>{o._d.getMonth() + 1} 月 {o._d.getDate()} 日</p>
       <p className="lead reveal" style={reveal(1)}>这一天你睡得很晚</p>
       <p className="lead big reveal" style={reveal(2)}><b className="em">{hh}:{mm}</b> 还在超域传送</p>
@@ -253,7 +253,7 @@ function SceneLongest(s: Stats): ReactElement | null {
   if (!t) return null;
   const place = `在 ${t.dc} 区「${t.dest}」`;
   return (
-    <Scene k="longest" bg={LIGHT[6]}>
+    <Scene k="longest" bg={LIGHT[6]} extra="has-art" deco={<NcmArt page={6} />}>
       <p className="lead reveal" style={reveal(0)}>你在远方住得最久的一次，是</p>
       <h2 className="hl reveal" style={reveal(1)}>{fmtDur(t.ms)}</h2>
       <p className="muted reveal" style={reveal(2)}>{t.kind === 'ongoing' ? place + '，至今仍未归' : place + '，一次长长的旅居'}</p>
@@ -264,7 +264,7 @@ function SceneLongest(s: Stats): ReactElement | null {
 function SceneRepat(s: Stats): ReactElement | null {
   if (!s.repatCount) return null;
   return (
-    <Scene k="repat" bg={LIGHT[7]}>
+    <Scene k="repat" bg={LIGHT[7]} extra="has-art" deco={<NcmArt page={8} />}>
       <p className="lead reveal" style={reveal(0)}>没有本地户口的你</p>
       <p className="bignum reveal" style={reveal(1)}>
         <b data-count={s.repatCount}>0</b>
@@ -279,7 +279,7 @@ function SceneOngoing(s: Stats): ReactElement | null {
   const t = s.ongoing;
   if (!t) return null;
   return (
-    <Scene k="ongoing" bg={NIGHT} dark>
+    <Scene k="ongoing" bg={NIGHT} dark extra="has-art" deco={<NcmArt page={5} />}>
       <p className="lead reveal" style={reveal(0)}>而此刻……</p>
       <p className="lead big reveal" style={reveal(1)}>
         你的角色「<b className="em">{t.role || s.roleName}</b>」

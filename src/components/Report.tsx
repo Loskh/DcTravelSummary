@@ -213,9 +213,9 @@ function SceneLateNight(s: Stats): ReactElement | null {
       <p className="lead reveal" style={reveal(0)}>{o._d.getMonth() + 1} 月 {o._d.getDate()} 日</p>
       <p className="lead reveal" style={reveal(1)}>这一天你睡得很晚</p>
       <p className="lead big reveal" style={reveal(2)}><b className="em">{hh}:{mm}</b> 还在超域传送</p>
-      <p className="muted reveal" style={reveal(3)}>传送完之后，又发了个「<b className="em">QQ 空间</b>」装逼</p>
+      <p className="muted reveal" style={reveal(3)}>传送完之后，又发了个「<b className="em">QQ 空间</b>」</p>
       <p className="lead reveal" style={reveal(4)}>
-        你见过 <b className="em">{wee ? '凌晨 ' : ''}{h} 点</b>的《<b className="em">{o.targetGroupName}</b>》吗
+        你见过 <b className="em">{wee ? '凌晨 ' : ''}{h} 点</b>的<b className="em">{o.targetGroupName}</b>吗
       </p>
     </Scene>
   );

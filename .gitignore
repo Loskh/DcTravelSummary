@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.vite/
+
+# local data (personal travel dumps)
+example/
+
+# logs
+*.log
+npm-debug.log*
+
+# local env / editor / OS
+*.local
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json

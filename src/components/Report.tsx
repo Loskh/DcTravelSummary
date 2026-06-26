@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import type { Stats } from '../lib/types';
 import { dcColor, donutStops, fmtDur, fmtFull, fmtYMD, describe } from '../lib/format';
+import { NcmArt02 } from './NcmArt02';
 
 type CSSVars = CSSProperties & Record<string, string | number>;
 const reveal = (i: number): CSSVars => ({ '--i': i });
@@ -24,12 +25,14 @@ interface SceneProps {
   bg: string;
   dark?: boolean;
   extra?: string;
+  deco?: ReactNode;
   children: ReactNode;
 }
-function Scene({ k, bg, dark, extra, children }: SceneProps): ReactElement {
+function Scene({ k, bg, dark, extra, deco, children }: SceneProps): ReactElement {
   const cls = 'scene' + (dark ? ' dark' : '') + (extra ? ' ' + extra : '');
   return (
     <section className={cls} style={{ background: bg }} key={k}>
+      {deco}
       <div className="wrap">{children}</div>
     </section>
   );
@@ -66,7 +69,7 @@ function SceneCover(s: Stats, onEnter: () => void): ReactElement {
 
 function SceneTotal(s: Stats): ReactElement {
   return (
-    <Scene k="total" bg={LIGHT[0]}>
+    <Scene k="total" bg={LIGHT[0]} extra="s-total" deco={<NcmArt02 />}>
       <p className="lead reveal" style={reveal(0)}>这段时间，你成功踏上了</p>
       <p className="bignum reveal" style={reveal(1)}>
         <b data-count={s.successDepart} data-dur={1500}>0</b>

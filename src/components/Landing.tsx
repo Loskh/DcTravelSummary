@@ -50,7 +50,6 @@ export function Landing({ onImport, onDemo, error }: Props) {
           <br />
           年度总结
         </h1>
-        <p className="landing-sub">把你的超域足迹，做成一份像模像样的报告。</p>
 
         <div className="landing-actions">
           <button className="btn primary" onClick={() => fileRef.current?.click()}>

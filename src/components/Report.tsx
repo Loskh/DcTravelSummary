@@ -19,6 +19,8 @@ const LIGHT = [
   '#fadfd2'
 ];
 const NIGHT = 'linear-gradient(0deg,#0e050b 0%,#2d1815 100%)';
+/* 彩蛋页：旧照片般的暖暗黄昏，区别于纯黑夜色 */
+const EGG = 'linear-gradient(160deg,#241826 0%,#4d2c3a 52%,#8a4a3c 100%)';
 
 interface SceneProps {
   k: string;
@@ -54,8 +56,10 @@ function countUp(el: HTMLElement) {
 
 /* ============================ 场景 ============================ */
 
+/** 超域旅行国服上线日，报告统计区间的固定起点 */
+const SERVICE_START = new Date(2025, 5, 26);
 function SceneCover(s: Stats, onEnter: () => void): ReactElement {
-  const range = s.firstDepart && s.lastEvent ? `${fmtYMD(s.firstDepart)} — ${fmtYMD(s.lastEvent)}` : '';
+  const range = `${fmtYMD(SERVICE_START)} — ${fmtYMD(s.asOf)}`;
   return (
     <Scene k="cover" bg="var(--cover)" dark extra="cover">
       <div className="sun" />
@@ -317,6 +321,74 @@ function SceneFirstLast(s: Stats): ReactElement {
   );
 }
 
+/* 彩蛋：2019 拆区补偿的免费转服（角色最早订单早于 2019-12-24 才出现） */
+function SceneFreeTransfer(s: Stats): ReactElement | null {
+  const f = s.freeTransfer;
+  if (!f) return null;
+  const day = fmtFull(f.date);
+
+  let body: ReactNode;
+  if (f.kase === 'won') {
+    body = (
+      <>
+        <p className="lead big reveal" style={reveal(3)}>
+          你的「<b className="em">{f.role}</b>」一连抢了 <b className="em">{f.attempts}</b> 次
+        </p>
+        <p className="lead reveal" style={reveal(4)}>
+          {f.fails > 0 ? (
+            <>前 {f.fails} 次「预检失败」，第 <b className="em">{f.attempts}</b> 次终于「迁移成功」</>
+          ) : (
+            <>第一下就「迁移成功」，欧皇实锤</>
+          )}
+        </p>
+        <p className="muted reveal" style={reveal(5)}>
+          {day}，从「{f.from}」0 元落户「<b className="em">{f.to}</b>」——这才是你超域故事真正的第 0 页
+        </p>
+      </>
+    );
+  } else if (f.kase === 'failed') {
+    body = (
+      <>
+        <p className="lead big reveal" style={reveal(3)}>
+          你的「<b className="em">{f.role}</b>」前后抢了 <b className="em">{f.attempts}</b> 次
+        </p>
+        <p className="lead reveal" style={reveal(4)}>
+          却 <b className="em">{f.attempts}</b> 次全部「预检失败」，一次也没抢着
+        </p>
+        <p className="muted reveal" style={reveal(5)}>
+          {day}，你留在了「{f.from}」——「没有本地户口」的命运，那天就已经写好了
+        </p>
+      </>
+    );
+  } else {
+    body = (
+      <>
+        <p className="lead big reveal" style={reveal(3)}>
+          你的「<b className="em">{f.role}</b>」只点了一下「转服」
+        </p>
+        <p className="lead reveal" style={reveal(4)}>
+          「预检失败」之后耸耸肩：「算了，不转了」
+        </p>
+        <p className="muted reveal" style={reveal(5)}>
+          {day}，你把根留在了「{f.from}」——后来每一次超域，都是在补当年的课
+        </p>
+      </>
+    );
+  }
+
+  return (
+    <Scene k="freetransfer" bg={EGG} dark extra="egg">
+      <p className="eyebrow reveal" style={reveal(0)}>彩蛋 · 2019 拆区补偿</p>
+      <p className="lead reveal" style={reveal(1)}>那年国服重拆大区，新开了「猫小胖」（那会儿还没有「豆豆柴」）</p>
+      <p className="lead reveal" style={reveal(2)}>老玩家有一次 0 元免费转服补偿——名额却要靠抢</p>
+      {body}
+      {f.roleCount > 1 && (
+        <p className="muted reveal" style={reveal(6)}>那场抢区，你共有 {f.roleCount} 个角色参战</p>
+      )}
+    </Scene>
+  );
+}
+
 function SceneFinale(s: Stats, onRestart: () => void): ReactElement {
   const top = s.byServer[0] || (['—', 0] as [string, number]);
   const rows: [string, string][] = [
@@ -366,6 +438,7 @@ function buildScenes(s: Stats, h: Handlers): ReactElement[] {
     SceneRepat(s),
     SceneOngoing(s),
     SceneFirstLast(s),
+    SceneFreeTransfer(s),
     SceneFinale(s, h.onRestart)
   ].filter((x): x is ReactElement => x !== null);
 }

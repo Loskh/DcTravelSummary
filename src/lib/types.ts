@@ -39,6 +39,20 @@ export interface StayResult {
   repatCount: number;
 }
 
+/** 2019 拆区补偿免费转服（migrationType 1，早于超域旅行上线）的彩蛋数据 */
+export type FreeKase = 'won' | 'failed' | 'gaveup';
+export interface FreeTransfer {
+  role: string;
+  attempts: number;
+  fails: number;
+  success: boolean;
+  from: string;
+  to: string;
+  date: Date;
+  kase: FreeKase;
+  roleCount: number;
+}
+
 export type Entry = [string, number];
 
 export interface Stats {
@@ -70,6 +84,8 @@ export interface Stats {
   repatCount: number;
   roleCounts: Entry[];
   roleName: string;
+  freeTransfer: FreeTransfer | null;
+  asOf: Date;
 }
 
 export interface Parsed {

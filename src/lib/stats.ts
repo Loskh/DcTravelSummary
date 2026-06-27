@@ -194,6 +194,29 @@ export function computeStats(all: Order[], fetchedAt: string | null): Stats {
   const latestDepart =
     outOK.filter((o) => o._d).slice().sort((a, b) => lateScore(b) - lateScore(a))[0] || null;
 
+  // 鸟区（陆行鸟）：国服最热门大区，晚高峰 18–21 点很难挤进
+  const BIRD_DC = '陆行鸟';
+  const toBirdOK = outOK.filter((o) => o.targetAreaName === BIRD_DC);
+  const birdTotal = toBirdOK.length;
+  const birdEvening = toBirdOK.filter((o) => {
+    const h = o._d ? o._d.getHours() : -1;
+    return h >= 18 && h < 21;
+  }).length;
+
+  // 两次「出发尝试」（migrationType 4，含预检失败）之间的最长间隔
+  let maxGapMs = -1;
+  let maxGapFrom: Date | null = null;
+  let maxGapTo: Date | null = null;
+  for (let i = 1; i < datedOut.length; i++) {
+    const g = +(datedOut[i]._d as Date) - +(datedOut[i - 1]._d as Date);
+    if (g > maxGapMs) {
+      maxGapMs = g;
+      maxGapFrom = datedOut[i - 1]._d as Date;
+      maxGapTo = datedOut[i]._d as Date;
+    }
+  }
+  const maxGapDays = maxGapMs > 0 ? Math.round(maxGapMs / DAY) : 0;
+
   return {
     total: out.length,
     successDepart: outOK.length,
@@ -224,6 +247,12 @@ export function computeStats(all: Order[], fetchedAt: string | null): Stats {
     roleCounts,
     roleName: roleCounts[0] ? roleCounts[0][0] : '旅行者',
     freeTransfer: computeFreeTransfer(all),
-    asOf: fetchedAt ? new Date(fetchedAt) : new Date()
+    asOf: fetchedAt ? new Date(fetchedAt) : new Date(),
+    birdDC: BIRD_DC,
+    birdTotal,
+    birdEvening,
+    maxGapDays,
+    maxGapFrom,
+    maxGapTo
   };
 }

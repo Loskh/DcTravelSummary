@@ -292,6 +292,41 @@ function SceneRepat(s: Stats): ReactElement | null {
   );
 }
 
+function SceneBird(s: Stats): ReactElement | null {
+  if (s.birdEvening <= 0) return null;
+  return (
+    <Scene k="bird" bg={NIGHT} dark>
+      <p className="lead reveal" style={reveal(0)}>「<b className="em">{s.birdDC}</b>」是国服最挤的大区</p>
+      <p className="bignum reveal" style={reveal(1)}>
+        <b data-count={s.birdEvening}>0</b>
+        <span className="unit">次</span>
+      </p>
+      <p className="lead reveal" style={reveal(2)}>
+        你在傍晚 <b className="em">6–9 点</b> 的高峰，硬是挤了进去
+      </p>
+      <p className="muted reveal" style={reveal(3)}>
+        全年共 <b className="em">{s.birdTotal}</b> 次落地鸟区——那可是要拼手速和运气的钟点
+      </p>
+    </Scene>
+  );
+}
+
+function SceneGap(s: Stats): ReactElement | null {
+  if (!s.maxGapDays || !s.maxGapFrom || !s.maxGapTo) return null;
+  return (
+    <Scene k="gap" bg={LIGHT[1]}>
+      <p className="lead reveal" style={reveal(0)}>有那么一阵子，你按兵不动</p>
+      <p className="bignum reveal" style={reveal(1)}>
+        <b data-count={s.maxGapDays}>0</b>
+        <span className="unit">天</span>
+      </p>
+      <p className="lead reveal" style={reveal(2)}>没有再尝试去别的大区</p>
+      <p className="muted reveal" style={reveal(3)}>{fmtFull(s.maxGapFrom)} → {fmtFull(s.maxGapTo)}</p>
+      <p className="muted reveal" style={reveal(4)}>看来你在自己区过得很安稳——又或者，那阵子根本没上线</p>
+    </Scene>
+  );
+}
+
 function SceneOngoing(s: Stats): ReactElement | null {
   const t = s.ongoing;
   if (!t) return null;
@@ -457,10 +492,12 @@ function buildScenes(s: Stats, h: Handlers): ReactElement[] {
     SceneOutBack(s),
     SceneTopServer(s),
     SceneDonut(s),
+    SceneBird(s),
     SceneFootprint(s),
     SceneHours(s),
     SceneLateNight(s),
     SceneMonths(s),
+    SceneGap(s),
     SceneLongest(s),
     SceneRepat(s),
     SceneOngoing(s),

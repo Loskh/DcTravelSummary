@@ -86,6 +86,14 @@ export interface Stats {
   roleName: string;
   freeTransfer: FreeTransfer | null;
   asOf: Date;
+  /** 鸟区（陆行鸟）相关：热门大区，晚高峰难进 */
+  birdDC: string;
+  birdTotal: number;
+  birdEvening: number;
+  /** 两次出发尝试之间的最长间隔（天）及其起止 */
+  maxGapDays: number;
+  maxGapFrom: Date | null;
+  maxGapTo: Date | null;
 }
 
 export interface Parsed {

@@ -71,6 +71,20 @@ function SceneCover(s: Stats, onEnter: () => void): ReactElement {
   );
 }
 
+/** 全程零次超域旅行：只显示这一页 */
+function SceneEmpty(onRestart: () => void): ReactElement {
+  return (
+    <Scene k="empty" bg="var(--cover)" dark extra="cover empty">
+      <div className="sun" />
+      <p className="eyebrow reveal" style={reveal(0)}>FINAL FANTASY XIV · 超域旅行</p>
+      <h1 className="cover-title reveal" style={reveal(1)}>0 次<br />超域旅行</h1>
+      <p className="cover-sub reveal" style={reveal(2)}>你居然从没体验过最新最 in 的超域旅行功能</p>
+      <p className="cover-range reveal" style={reveal(3)}>快上线试试吧——下一年的报告，等你来填 ✦</p>
+      <button className="enter reveal" style={reveal(4)} onClick={onRestart}>换个文件</button>
+    </Scene>
+  );
+}
+
 function SceneTotal(s: Stats): ReactElement {
   return (
     <Scene k="total" bg={LIGHT[0]} extra="has-art" deco={<NcmArt page={2} />}>
@@ -486,6 +500,7 @@ interface Handlers {
   onEnter: () => void;
 }
 function buildScenes(s: Stats, h: Handlers): ReactElement[] {
+  if (s.successDepart === 0 && s.backOK === 0) return [SceneEmpty(h.onRestart)];
   return [
     SceneCover(s, h.onEnter),
     SceneTotal(s),

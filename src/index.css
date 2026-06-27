@@ -315,6 +315,7 @@ b[data-count] { font-variant-numeric: tabular-nums; color: var(--red); }
 }
 .cover-sub { font-size: clamp(20px, 3.2vw, 26px); color: #fff; margin: 0 0 8px; font-weight: 800; }
 .cover-range { color: rgba(255, 255, 255, 0.82); letter-spacing: 0.04em; }
+.empty .cover-sub, .empty .cover-range { text-align: center; max-width: min(560px, 90vw); }
 .cover .enter {
   margin-top: 40px;
   border: 1px solid rgba(255, 255, 255, 0.8);

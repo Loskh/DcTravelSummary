@@ -488,7 +488,7 @@ function SceneFinale(s: Stats, onRestart: () => void): ReactElement {
             </li>
           ))}
         </ul>
-        <p className="card-foot">DC TRAVEL WRAPPED</p>
+        <p className="card-foot">DC TRAVEL SUMMARY</p>
       </div>
       <button className="btn reveal" style={reveal(1)} onClick={onRestart}>再看一次 ↻</button>
     </Scene>

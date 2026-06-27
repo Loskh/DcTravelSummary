@@ -1,4 +1,4 @@
-import type { Order, Entry, Trip, StayResult, Stats, FreeTransfer } from './types';
+import type { Order, Entry, Trip, StayResult, Stats, FreeTransfer, FreeKase } from './types';
 import { DAY, ymd } from './format';
 
 function countBy<T>(a: T[], f: (x: T) => string): Record<string, number> {
@@ -102,9 +102,11 @@ export function analyzeStays(travel: Order[], nowTs: number): StayResult {
    - 2019.12.24「超域旅行」上线前，唯一会进订单系统的就是那次拆区补偿的免费转服（migrationType 1，0 元）。
    - 当时新开了猫小胖区（还没有豆豆柴），名额靠抢，预检失败（-1）= 没抢到，迁移成功（5）= 落户成功。
    - 把所有早于该时刻的订单视为同一次「抢区」会话（最早一条角色名常缺失，按角色拆分会少算次数）。
-   - 三类剧情：won 抢了 N 次才成功 / failed 抢了 N 次都没成 / gaveup 只点了一下就不转了。
+   - 四类剧情：veteran 拆区前（2019 年之前）就在、没参与那次转服的老玩家 /
+     won 抢了 N 次才成功 / failed 抢了 N 次都没成 / gaveup 只点了一下就不转了。
 */
 const FREE_ERA_END = Date.parse('2019-12-24T00:00:00');
+const PRE_SPLIT = Date.parse('2019-01-01T00:00:00'); // 早于此即拆区之前的老玩家
 
 function computeFreeTransfer(all: Order[]): FreeTransfer | null {
   const free = all
@@ -118,7 +120,8 @@ function computeFreeTransfer(all: Order[]): FreeTransfer | null {
   const fails = free.filter((o) => o.migrationStatus === -1).length;
   const ref = successOrder || free[free.length - 1];
   const roles = Array.from(new Set(free.map((o) => o._role).filter(Boolean))) as string[];
-  const kase = success ? 'won' : attempts >= 2 ? 'failed' : 'gaveup';
+  const veteran = +(free[0]._d as Date) < PRE_SPLIT;
+  const kase: FreeKase = veteran ? 'veteran' : success ? 'won' : attempts >= 2 ? 'failed' : 'gaveup';
 
   return {
     role: roles[0] || ref._role || '你的角色',

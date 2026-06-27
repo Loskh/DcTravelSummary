@@ -450,25 +450,25 @@ b[data-count] { font-variant-numeric: tabular-nums; color: var(--red); }
 .ev .ev-desc { color: var(--ink-soft); margin: 0; line-height: 1.6; }
 
 /* 终页分享卡 */
+.scene.finale > .wrap { max-width: 760px; }
 .finale .card {
   border: 1px solid var(--line);
-  border-radius: 28px;
-  padding: 40px 38px;
+  border-radius: 34px;
+  padding: 56px 52px;
   background: rgba(255, 255, 255, 0.72);
   box-shadow: var(--shadow);
   text-align: left;
-  width: 100%;
-  max-width: 540px;
+  width: min(660px, 88vw);
   margin: 0 auto;
   backdrop-filter: blur(8px);
 }
-.card-title { color: var(--red); letter-spacing: 0.1em; font-size: 16px; margin: 0 0 24px; text-transform: uppercase; font-weight: 800; }
+.card-title { color: var(--red); letter-spacing: 0.1em; font-size: 20px; margin: 0 0 30px; text-transform: uppercase; font-weight: 800; }
 .card-stats { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; }
-.card-stats li { display: flex; justify-content: space-between; align-items: baseline; padding: 15px 0; border-bottom: 1px dashed var(--line); }
+.card-stats li { display: flex; justify-content: space-between; align-items: baseline; padding: 19px 0; border-bottom: 1px dashed var(--line); }
 .card-stats li:last-child { border-bottom: none; }
-.card-stats span { color: var(--ink-soft); font-size: 17px; }
-.card-stats b { font-size: 24px; color: var(--ink); }
-.card-foot { color: var(--ink-soft); font-size: 12px; letter-spacing: 0.16em; margin: 24px 0 0; text-align: center; }
+.card-stats span { color: var(--ink-soft); font-size: 21px; }
+.card-stats b { font-size: 31px; color: var(--ink); }
+.card-foot { color: var(--ink-soft); font-size: 13px; letter-spacing: 0.16em; margin: 32px 0 0; text-align: center; }
 .finale .btn { margin-top: 26px; border-color: rgba(223, 73, 58, 0.5); color: var(--red); background: rgba(255, 255, 255, 0.6); }
 .finale .btn:hover { background: #fff; }
 

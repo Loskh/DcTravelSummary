@@ -93,12 +93,22 @@ function SceneTotal(s: Stats): ReactElement {
 function SceneOutBack(s: Stats): ReactElement {
   const sum = s.successDepart + s.backOK || 1;
   const pct = Math.round((s.successDepart / sum) * 100);
+  const away = Math.max(0, s.successDepart - s.backOK);
   return (
     <Scene k="outback" bg={LIGHT[1]} extra="has-art" deco={<NcmArt page={7} />}>
       <p className="lead reveal" style={reveal(0)}>你 <b data-count={s.successDepart}>0</b> 次启程远行</p>
       <p className="lead reveal" style={reveal(1)}>又 <b data-count={s.backOK}>0</b> 次平安回到「{s.homeServer}」</p>
       <div className="ratiobar reveal" style={reveal(2)}><i data-grow={pct} /></div>
-      <p className="muted reveal" style={reveal(3)}>{s.ongoing ? '此刻还有一段旅程仍在继续……' : '有去有回，是旅人的浪漫'}</p>
+      {away > 0 && (
+        <p className="lead reveal" style={reveal(3)}>剩下 <b className="em" data-count={away}>0</b> 次有去无回</p>
+      )}
+      <p className="muted reveal" style={reveal(away > 0 ? 4 : 3)}>
+        {away > 0
+          ? '不是被悄悄遣返，就是还流浪在远方'
+          : s.ongoing
+          ? '此刻还有一段旅程仍在继续……'
+          : '有去有回，是旅人的浪漫'}
+      </p>
     </Scene>
   );
 }
@@ -326,22 +336,37 @@ function SceneFreeTransfer(s: Stats): ReactElement | null {
   const f = s.freeTransfer;
   if (!f) return null;
   const day = fmtFull(f.date);
+  const year = f.date.getFullYear();
 
   let body: ReactNode;
-  if (f.kase === 'won') {
+  if (f.kase === 'veteran') {
     body = (
       <>
-        <p className="lead big reveal" style={reveal(3)}>
+        <p className="lead big reveal" style={reveal(2)}>
+          而你的「<b className="em">{f.role}</b>」，来得比这还要早
+        </p>
+        <p className="lead reveal" style={reveal(3)}>
+          早在 <b className="em">{year}</b> 年就在的老前辈，那场免费转服你压根没去凑
+        </p>
+        <p className="muted reveal" style={reveal(4)}>
+          拆区分服的腥风血雨，你只远远看着——资历比「猫小胖」还老
+        </p>
+      </>
+    );
+  } else if (f.kase === 'won') {
+    body = (
+      <>
+        <p className="lead big reveal" style={reveal(2)}>
           你的「<b className="em">{f.role}</b>」一连抢了 <b className="em">{f.attempts}</b> 次
         </p>
-        <p className="lead reveal" style={reveal(4)}>
+        <p className="lead reveal" style={reveal(3)}>
           {f.fails > 0 ? (
             <>前 {f.fails} 次「预检失败」，第 <b className="em">{f.attempts}</b> 次终于「迁移成功」</>
           ) : (
             <>第一下就「迁移成功」，欧皇实锤</>
           )}
         </p>
-        <p className="muted reveal" style={reveal(5)}>
+        <p className="muted reveal" style={reveal(4)}>
           {day}，从「{f.from}」0 元落户「<b className="em">{f.to}</b>」——这才是你超域故事真正的第 0 页
         </p>
       </>
@@ -349,13 +374,13 @@ function SceneFreeTransfer(s: Stats): ReactElement | null {
   } else if (f.kase === 'failed') {
     body = (
       <>
-        <p className="lead big reveal" style={reveal(3)}>
+        <p className="lead big reveal" style={reveal(2)}>
           你的「<b className="em">{f.role}</b>」前后抢了 <b className="em">{f.attempts}</b> 次
         </p>
-        <p className="lead reveal" style={reveal(4)}>
+        <p className="lead reveal" style={reveal(3)}>
           却 <b className="em">{f.attempts}</b> 次全部「预检失败」，一次也没抢着
         </p>
-        <p className="muted reveal" style={reveal(5)}>
+        <p className="muted reveal" style={reveal(4)}>
           {day}，你留在了「{f.from}」——「没有本地户口」的命运，那天就已经写好了
         </p>
       </>
@@ -363,13 +388,13 @@ function SceneFreeTransfer(s: Stats): ReactElement | null {
   } else {
     body = (
       <>
-        <p className="lead big reveal" style={reveal(3)}>
+        <p className="lead big reveal" style={reveal(2)}>
           你的「<b className="em">{f.role}</b>」只点了一下「转服」
         </p>
-        <p className="lead reveal" style={reveal(4)}>
+        <p className="lead reveal" style={reveal(3)}>
           「预检失败」之后耸耸肩：「算了，不转了」
         </p>
-        <p className="muted reveal" style={reveal(5)}>
+        <p className="muted reveal" style={reveal(4)}>
           {day}，你把根留在了「{f.from}」——后来每一次超域，都是在补当年的课
         </p>
       </>
@@ -379,11 +404,10 @@ function SceneFreeTransfer(s: Stats): ReactElement | null {
   return (
     <Scene k="freetransfer" bg={EGG} dark extra="egg">
       <p className="eyebrow reveal" style={reveal(0)}>彩蛋 · 2019 拆区补偿</p>
-      <p className="lead reveal" style={reveal(1)}>那年国服重拆大区，新开了「猫小胖」（那会儿还没有「豆豆柴」）</p>
-      <p className="lead reveal" style={reveal(2)}>老玩家有一次 0 元免费转服补偿——名额却要靠抢</p>
+      <p className="lead reveal" style={reveal(1)}>那年国服重拆大区，新开了「猫小胖」</p>
       {body}
-      {f.roleCount > 1 && (
-        <p className="muted reveal" style={reveal(6)}>那场抢区，你共有 {f.roleCount} 个角色参战</p>
+      {f.kase !== 'veteran' && f.roleCount > 1 && (
+        <p className="muted reveal" style={reveal(5)}>那场抢区，你共有 {f.roleCount} 个角色参战</p>
       )}
     </Scene>
   );
@@ -531,7 +555,6 @@ export function Report({ stats, onRestart }: Props) {
       <header className="topbar">
         <button className="chip" onClick={onRestart} title="返回首页">⌂ 返回</button>
         <div className="spacer" />
-        <span className="brand">DC&nbsp;Travel&nbsp;Wrapped</span>
       </header>
       <main className="deck" ref={deckRef}>
         {scenes}

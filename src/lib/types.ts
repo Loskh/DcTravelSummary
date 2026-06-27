@@ -40,7 +40,7 @@ export interface StayResult {
 }
 
 /** 2019 拆区补偿免费转服（migrationType 1，早于超域旅行上线）的彩蛋数据 */
-export type FreeKase = 'won' | 'failed' | 'gaveup';
+export type FreeKase = 'won' | 'failed' | 'gaveup' | 'veteran';
 export interface FreeTransfer {
   role: string;
   attempts: number;

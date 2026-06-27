@@ -3,11 +3,10 @@ import { BM_DOWNLOAD, BM_POSTMESSAGE } from '../lib/bookmarklets';
 
 interface Props {
   onImport: (text: string) => void;
-  onDemo: () => void;
   error: string;
 }
 
-export function Landing({ onImport, onDemo, error }: Props) {
+export function Landing({ onImport, error }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState('');
 
@@ -55,9 +54,6 @@ export function Landing({ onImport, onDemo, error }: Props) {
           <button className="btn primary" onClick={() => fileRef.current?.click()}>
             选择 JSON 文件
           </button>
-          <button className="btn ghost" onClick={onDemo}>
-            先看示例 ▸
-          </button>
         </div>
         <input
           ref={fileRef}
@@ -95,13 +91,15 @@ export function Landing({ onImport, onDemo, error }: Props) {
             </button>
           </div>
 
-          <p className="method-h">方式二 · 一键直达（部署后可用）</p>
+          <p className="method-h">方式二 · 一键直达</p>
           <ol className="steps">
+            <li>把下面的<b>直达书签</b>加到浏览器书签栏。</li>
             <li>
-              把本页部署到一个网址（如 GitHub Pages），并把书签里的 <code>REPORT</code> 改成该网址。
+              在已登录的<b>国服 FF14 官网</b>点该书签，并<b>允许弹窗</b>。
             </li>
             <li>
-              官网点该书签：自动打开报告页并通过 <code>postMessage</code> 传数据，无需下载上传。
+              它会自动打开报告页 <code>loskh.github.io/DcTravelSummary</code>，并通过{' '}
+              <code>postMessage</code> 把数据传过来，无需下载、上传。
             </li>
           </ol>
           <div className="code-row">

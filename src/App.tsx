@@ -3,7 +3,6 @@ import { Landing } from './components/Landing';
 import { Report } from './components/Report';
 import { parse } from './lib/parse';
 import { computeStats } from './lib/stats';
-import { DEMO } from './lib/demo';
 import { CONFIG } from './lib/config';
 import type { Parsed } from './lib/types';
 
@@ -55,7 +54,7 @@ export default function App() {
           }}
         />
       ) : (
-        <Landing onImport={handleImport} onDemo={() => handleImport(DEMO)} error={error} />
+        <Landing onImport={handleImport} error={error} />
       )}
     </>
   );

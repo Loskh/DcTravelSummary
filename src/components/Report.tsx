@@ -91,22 +91,25 @@ function SceneTotal(s: Stats): ReactElement {
 }
 
 function SceneOutBack(s: Stats): ReactElement {
-  const sum = s.successDepart + s.backOK || 1;
-  const pct = Math.round((s.successDepart / sum) * 100);
-  const away = Math.max(0, s.successDepart - s.backOK);
+  const home = s.pairedCount; // 完成往返：与某次出发配对的成功返回
+  const repat = s.repatCount; // 出发后没等到返回 = 被自动遣返
+  const ongoing = s.ongoingList.length; // 出发后至今未归
+  const pct = s.successDepart ? Math.round((home / s.successDepart) * 100) : 0;
+  let i = 2;
   return (
     <Scene k="outback" bg={LIGHT[1]} extra="has-art" deco={<NcmArt page={7} />}>
       <p className="lead reveal" style={reveal(0)}>你 <b data-count={s.successDepart}>0</b> 次启程远行</p>
-      <p className="lead reveal" style={reveal(1)}>又 <b data-count={s.backOK}>0</b> 次平安回到「{s.homeServer}」</p>
-      <div className="ratiobar reveal" style={reveal(2)}><i data-grow={pct} /></div>
-      {away > 0 && (
-        <p className="lead reveal" style={reveal(3)}>剩下 <b className="em" data-count={away}>0</b> 次有去无回</p>
+      <p className="lead reveal" style={reveal(1)}>又 <b data-count={home}>0</b> 次平安回到「{s.homeServer}」</p>
+      <div className="ratiobar reveal" style={reveal(i++)}><i data-grow={pct} /></div>
+      {repat > 0 && (
+        <p className="lead reveal" style={reveal(i++)}>另有 <b className="em" data-count={repat}>0</b> 次被悄悄遣返</p>
       )}
-      <p className="muted reveal" style={reveal(away > 0 ? 4 : 3)}>
-        {away > 0
-          ? '不是被悄悄遣返，就是还流浪在远方'
-          : s.ongoing
-          ? '此刻还有一段旅程仍在继续……'
+      {ongoing > 0 && (
+        <p className="lead reveal" style={reveal(i++)}>还有 <b className="em" data-count={ongoing}>0</b> 次至今未归</p>
+      )}
+      <p className="muted reveal" style={reveal(i)}>
+        {repat > 0 || ongoing > 0
+          ? '离线太久会被自动送回「家」——那些没说再见的离开，凑成了出发与归来的差额'
           : '有去有回，是旅人的浪漫'}
       </p>
     </Scene>
@@ -416,8 +419,8 @@ function SceneFreeTransfer(s: Stats): ReactElement | null {
 function SceneFinale(s: Stats, onRestart: () => void): ReactElement {
   const top = s.byServer[0] || (['—', 0] as [string, number]);
   const rows: [string, string][] = [
-    ['成功旅行', s.successDepart + ' 次'],
-    ['平安归家', s.backOK + ' 次'],
+    ['成功出发', s.successDepart + ' 次'],
+    ['平安归家', s.pairedCount + ' 次'],
     ['被遣返', s.repatCount + ' 次'],
     ['最常造访', String(top[0])],
     ['覆盖服务器', s.uniqueServers + ' 个'],

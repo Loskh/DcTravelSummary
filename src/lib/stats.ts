@@ -36,8 +36,8 @@ function argmax(a: number[]): number {
 /* ---------- 停留 / 遣返 / 至今未归 分析 ----------
    - 用「成功」的出发(4)/返回(5)按时间配对，得到完整往返（精确时长）。
    - 成功出发后没有成功返回 = 被自动遣返（离线>1天送回原服务器，常缺返回订单）。
-   - 仅当最后一次成功出发之后「再无任何订单」才算「至今未归」；
-     若其后还有订单（哪怕是预检失败的返回），说明人已不在那里 = 已被遣返。
+   - 「至今未归」需同时满足：最后一次成功出发之后「再无任何订单」，且距今 ≤ 1 天；
+     若其后还有订单（哪怕预检失败的返回），或已超过 1 天（自动遣返必已触发），都算「已被遣返」。
    - 缺返回的停留时长未知，按「至少 1 天」处理，不参与「最久」评比。
    - 按角色分别配对：不同角色可能交错（A出发,B出发,B返回,A返回）。
 */
@@ -73,8 +73,11 @@ export function analyzeStays(travel: Order[], nowTs: number): StayResult {
     if (away) {
       const a = away as { depart: Date; dest: string; dc: string };
       const hasLater = list.some((o) => +o._d! > +a.depart);
-      const t: Trip = { dest: a.dest, dc: a.dc, depart: a.depart, ret: null, role: r, kind: hasLater ? 'repat' : 'ongoing', ms: 0 };
-      if (!hasLater) ongoingList.push(t);
+      // 没有返回订单时：其后还有订单 → 人已不在 = 遣返；
+      // 否则看距今——超过一天必已被自动遣返，唯有一天之内才算「至今未归」
+      const ongoing = !hasLater && nowTs - +a.depart <= DAY;
+      const t: Trip = { dest: a.dest, dc: a.dc, depart: a.depart, ret: null, role: r, kind: ongoing ? 'ongoing' : 'repat', ms: 0 };
+      if (ongoing) ongoingList.push(t);
       trips.push(t);
     }
   });

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { BM_DOWNLOAD, BM_POSTMESSAGE } from '../lib/bookmarklets';
+import { BM_DOWNLOAD, bmPostMessage } from '../lib/bookmarklets';
 
 interface Props {
   onImport: (text: string) => void;
@@ -9,6 +9,11 @@ interface Props {
 export function Landing({ onImport, error }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState('');
+
+  // 直达书签按「当前所在域名」动态生成，兼容任意镜像站
+  const reportUrl = window.location.origin + window.location.pathname;
+  const reportHost = window.location.host + window.location.pathname;
+  const bmPost = bmPostMessage(reportUrl);
 
   function readFile(f: File | undefined | null) {
     if (!f) return;
@@ -98,13 +103,13 @@ export function Landing({ onImport, error }: Props) {
               在已登录的<b>国服 FF14 官网</b>点该书签，并<b>允许弹窗</b>。
             </li>
             <li>
-              它会自动打开报告页 <code>loskh.github.io/DcTravelSummary</code>，并通过{' '}
+              它会自动打开报告页 <code>{reportHost}</code>，并通过{' '}
               <code>postMessage</code> 把数据传过来，无需下载、上传。
             </li>
           </ol>
           <div className="code-row">
-            <textarea className="bm-box" readOnly spellCheck={false} rows={3} value={BM_POSTMESSAGE} />
-            <button className="btn small" onClick={() => copy(BM_POSTMESSAGE, '直达书签')}>
+            <textarea className="bm-box" readOnly spellCheck={false} rows={3} value={bmPost} />
+            <button className="btn small" onClick={() => copy(bmPost, '直达书签')}>
               复制直达书签
             </button>
           </div>
